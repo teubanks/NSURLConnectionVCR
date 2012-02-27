@@ -7,8 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1007805E14FBE3A8009362E5 /* NSURLConnectionVCR.mm in Sources */ = {isa = PBXBuildFile; fileRef = 10852AEB14F906A70004895D /* NSURLConnectionVCR.mm */; };
-		1007806014FBE3B9009362E5 /* SKUtils.mm in Sources */ = {isa = PBXBuildFile; fileRef = 10852AE914F906A70004895D /* SKUtils.mm */; };
+		1007805E14FBE3A8009362E5 /* NSURLConnectionVCR.m in Sources */ = {isa = PBXBuildFile; fileRef = 10852AEB14F906A70004895D /* NSURLConnectionVCR.m */; };
 		1007806314FBE8B5009362E5 /* VCRGetPreview.h in Headers */ = {isa = PBXBuildFile; fileRef = 1007806114FBE8B5009362E5 /* VCRGetPreview.h */; };
 		1007806414FBE8B5009362E5 /* VCRGetPreview.m in Sources */ = {isa = PBXBuildFile; fileRef = 1007806214FBE8B5009362E5 /* VCRGetPreview.m */; };
 		1007806614FBEC26009362E5 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1007806514FBEC26009362E5 /* WebKit.framework */; };
@@ -40,10 +39,8 @@
 		10852AD614F906870004895D /* NSURLConnectionVCR.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 10852AB814F906870004895D /* NSURLConnectionVCR.framework */; };
 		10852ADC14F906870004895D /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 10852ADA14F906870004895D /* InfoPlist.strings */; };
 		10852ADF14F906870004895D /* NSURLConnectionVCRTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 10852ADE14F906870004895D /* NSURLConnectionVCRTests.m */; };
-		10852AEC14F906A70004895D /* SKUtils.h in Headers */ = {isa = PBXBuildFile; fileRef = 10852AE814F906A70004895D /* SKUtils.h */; };
-		10852AED14F906A70004895D /* SKUtils.mm in Sources */ = {isa = PBXBuildFile; fileRef = 10852AE914F906A70004895D /* SKUtils.mm */; };
 		10852AEE14F906A70004895D /* NSURLConnectionVCR.h in Headers */ = {isa = PBXBuildFile; fileRef = 10852AEA14F906A70004895D /* NSURLConnectionVCR.h */; };
-		10852AEF14F906A70004895D /* NSURLConnectionVCR.mm in Sources */ = {isa = PBXBuildFile; fileRef = 10852AEB14F906A70004895D /* NSURLConnectionVCR.mm */; };
+		10852AEF14F906A70004895D /* NSURLConnectionVCR.m in Sources */ = {isa = PBXBuildFile; fileRef = 10852AEB14F906A70004895D /* NSURLConnectionVCR.m */; };
 		10ACCB8114FBD73D007F9BB5 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 10ACCB8014FBD73D007F9BB5 /* CoreServices.framework */; };
 		10ACCB8B14FBDA06007F9BB5 /* QuickLook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 10ACCB8A14FBDA06007F9BB5 /* QuickLook.framework */; };
 		10ACCB8D14FBDA06007F9BB5 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 10ACCB8C14FBDA06007F9BB5 /* ApplicationServices.framework */; };
@@ -128,10 +125,8 @@
 		10852ADB14F906870004895D /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		10852ADD14F906870004895D /* NSURLConnectionVCRTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NSURLConnectionVCRTests.h; sourceTree = "<group>"; };
 		10852ADE14F906870004895D /* NSURLConnectionVCRTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NSURLConnectionVCRTests.m; sourceTree = "<group>"; };
-		10852AE814F906A70004895D /* SKUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SKUtils.h; sourceTree = "<group>"; };
-		10852AE914F906A70004895D /* SKUtils.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = SKUtils.mm; sourceTree = "<group>"; };
 		10852AEA14F906A70004895D /* NSURLConnectionVCR.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSURLConnectionVCR.h; sourceTree = "<group>"; };
-		10852AEB14F906A70004895D /* NSURLConnectionVCR.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = NSURLConnectionVCR.mm; sourceTree = "<group>"; };
+		10852AEB14F906A70004895D /* NSURLConnectionVCR.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSURLConnectionVCR.m; sourceTree = "<group>"; };
 		10852AF814F9364D0004895D /* libprofile_rt.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libprofile_rt.dylib; path = Toolchains/XcodeDefault.xctoolchain/usr/lib/libprofile_rt.dylib; sourceTree = DEVELOPER_DIR; };
 		10ACCB8014FBD73D007F9BB5 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = /System/Library/Frameworks/CoreServices.framework; sourceTree = "<absolute>"; };
 		10ACCB8914FBDA06007F9BB5 /* NSURLConnectionVCRQuicklook.qlgenerator */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NSURLConnectionVCRQuicklook.qlgenerator; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -335,10 +330,8 @@
 		10852AC114F906870004895D /* NSURLConnectionVCR */ = {
 			isa = PBXGroup;
 			children = (
-				10852AE814F906A70004895D /* SKUtils.h */,
-				10852AE914F906A70004895D /* SKUtils.mm */,
 				10852AEA14F906A70004895D /* NSURLConnectionVCR.h */,
-				10852AEB14F906A70004895D /* NSURLConnectionVCR.mm */,
+				10852AEB14F906A70004895D /* NSURLConnectionVCR.m */,
 				10852AC214F906870004895D /* Supporting Files */,
 			);
 			path = NSURLConnectionVCR;
@@ -404,7 +397,6 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				10852AEC14F906A70004895D /* SKUtils.h in Headers */,
 				10852AEE14F906A70004895D /* NSURLConnectionVCR.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -563,8 +555,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				10852AED14F906A70004895D /* SKUtils.mm in Sources */,
-				10852AEF14F906A70004895D /* NSURLConnectionVCR.mm in Sources */,
+				10852AEF14F906A70004895D /* NSURLConnectionVCR.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -602,8 +593,7 @@
 				10ACCB9814FBDA06007F9BB5 /* GenerateThumbnailForURL.m in Sources */,
 				10ACCB9A14FBDA06007F9BB5 /* GeneratePreviewForURL.m in Sources */,
 				10ACCB9C14FBDA06007F9BB5 /* main.c in Sources */,
-				1007805E14FBE3A8009362E5 /* NSURLConnectionVCR.mm in Sources */,
-				1007806014FBE3B9009362E5 /* SKUtils.mm in Sources */,
+				1007805E14FBE3A8009362E5 /* NSURLConnectionVCR.m in Sources */,
 				1007806414FBE8B5009362E5 /* VCRGetPreview.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
