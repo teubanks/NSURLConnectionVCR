@@ -6,7 +6,6 @@
 //
 
 #import "NSURLConnectionVCR.h"
-#import "SKUtils.h"
 #import <CommonCrypto/CommonDigest.h>
 #import <objc/runtime.h>
 #import <objc/objc.h>
@@ -114,17 +113,14 @@ __strong static NSString* casettesPath;
             return NO;
         } else {
             // Swizzle the class methods we want to intercept (instance methods of the metaClasses):
-            Class connectionMetaClass = objc_getMetaClass("NSURLConnection");
-            Class connectionClass = objc_getClass("NSURLConnection");
+            Class theClass = objc_getMetaClass("NSURLConnection");
             Method origMethod;
             IMP poseImplementation;
             SEL theSelector;
-            Class theClass;
             origImps = (IMP*)malloc(swizzleCount * sizeof(IMP));
             
             for (uint8 i = 0; i < swizzleCount; ++i) {
-                theSelector = swizzles[i].sel;
-                theClass = swizzles[i].isClassMethod ? connectionMetaClass : connectionClass;
+                theSelector = swizzleSelectors[i];
                 origMethod = class_getInstanceMethod(theClass, theSelector);
                 origImps[i] = method_getImplementation(origMethod);
                 poseImplementation = imp_implementationWithBlock(poseImplementationBlockForSelector(theSelector));
@@ -143,15 +139,12 @@ __strong static NSString* casettesPath;
         return NO;
     } else {
         Method theMethod;
-        Class connectionMetaClass = objc_getMetaClass("NSURLConnection");
-        Class connectionClass = objc_getClass("NSURLConnection");
         SEL theSelector;
-        Class theClass;
+        Class theClass = objc_getMetaClass("NSURLConnection");
         IMP previousImp;
 
         for (uint8 i = 0; i < swizzleCount; ++i) {
-            theSelector = swizzles[i].sel;
-            theClass = swizzles[i].isClassMethod ? connectionMetaClass : connectionClass;
+            theSelector = swizzleSelectors[i];
             theMethod = class_getInstanceMethod(theClass, theSelector);
             previousImp = class_replaceMethod(theClass, theSelector, origImps[i], method_getTypeEncoding(theMethod));
             imp_removeBlock(previousImp);
@@ -170,17 +163,14 @@ __strong static NSString* casettesPath;
 
 #pragma mark Class posing / Swizzle bizz
 
-struct swizzle {
-    SEL sel;
-    BOOL isClassMethod;
-};
-
 static const uint8 swizzleCount = 3;
-static struct swizzle swizzles[swizzleCount] = {
-    {@selector(alloc), YES},
-    {@selector(sendSynchronousRequest:returningResponse:error:), YES},
-    {@selector(sendAsynchronousRequest:queue:completionHandler:), YES}
-};
+static SEL swizzleSelectors[swizzleCount] = {NULL, NULL, NULL};
+
++ (void)initialize {
+    swizzleSelectors[0] = @selector(alloc);
+    swizzleSelectors[1] = @selector(sendSynchronousRequest:returningResponse:error:);
+    swizzleSelectors[2] = @selector(sendAsynchronousRequest:queue:completionHandler:);
+}
 
 static IMP *origImps = NULL;
 
