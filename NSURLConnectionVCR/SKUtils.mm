@@ -19,7 +19,7 @@ CFStringRef SKUtilsCreateStringHexadecimalRepresentationOfBytes(const UInt8* byt
         ++ptr;
         ++bytes;
         if (ptr == last) {
-            return (__bridge_retained CFStringRef)[[NSString alloc] initWithBytesNoCopy:c length:length * 2 encoding:NSUTF8StringEncoding freeWhenDone:NO];
+            return (__bridge_retained CFStringRef)[[NSString alloc] initWithBytesNoCopy:c length:length * 2 encoding:NSUTF8StringEncoding freeWhenDone:YES];
             
             // Not implemented in Cocotron:
 //            return CFStringCreateWithBytesNoCopy(NULL, c, length * 2, kCFStringEncodingUTF8, false, kCFAllocatorMalloc);

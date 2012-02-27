@@ -8,6 +8,10 @@
 
 #import <Foundation/Foundation.h>
 
-@interface VCRGetPreview : NSObject
-
-@end
+OSStatus VCRGetPreviewData(NSURL* url,
+                           NSData *__autoreleasing *responseData,
+                           NSURLResponse *__autoreleasing*response,
+                           NSString *__autoreleasing *displayName,
+                           NSString *__autoreleasing *mimeType,
+                           NSString *__autoreleasing *utType,
+                           NSString *__autoreleasing *encoding);

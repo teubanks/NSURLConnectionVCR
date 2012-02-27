@@ -9,37 +9,97 @@
 #import "SKUtils.h"
 #import <CommonCrypto/CommonDigest.h>
 #import <objc/runtime.h>
- 
+#import <objc/objc.h>
+#import <CoreServices/CoreServices.h>
+
 NSString* NSURLConnectionVCRErrorDomain = @"NSURLConnectionVCRErrorDomain";
 struct objc_class;
 __strong static NSString* casettesPath;
 
+#pragma mark - Private Interfaces
 
 @interface VCRCache : NSObject <NSCoding>
 @property (nonatomic, readwrite, strong) NSURLResponse* response;
 @property (nonatomic, readwrite, strong) NSData* responseBody;
 + (VCRCache*)loadCacheForRequest:(NSURLRequest*)request;
-+ (BOOL)storeResponse:(NSURLResponse*)response withResponseBody:(NSData*)data forRequest:(NSURLRequest*)request;
++ (VCRCache*)storeResponse:(NSURLResponse*)response withResponseBody:(NSData*)data forRequest:(NSURLRequest*)request success:(out BOOL*)outSuccess;
++ (BOOL)deleteCacheForRequest:(NSURLRequest*)request error:(NSError *__autoreleasing *)error;
++ (BOOL)hasCacheForRequest:(NSURLRequest*)request;
 @end
 
+@class VCRConnectionDelegate;
 
 @interface NSURLConnectionVCR ()
-@property (nonatomic, retain, readwrite) NSURLConnection* origConnection;
+@property (nonatomic, retain, readwrite) NSURLConnection* connection;
+@property (nonatomic, retain, readwrite) VCRConnectionDelegate* delegate;
+@end
+
+@interface VCRConnectionDelegate : NSObject
+@property (nonatomic, retain, readwrite) id realDelegate;
+@property (nonatomic, retain, readwrite) NSURLConnectionVCR *vcr;
+@property (nonatomic, retain, readwrite) NSURLRequest* request;
+@property (nonatomic, retain, readonly) NSURLResponse* response;
+@property (nonatomic, retain, readonly) NSData* responseData;
+@end
+
+@interface VCRCache (Private)
++ (NSString*)hashForRequest:(NSURLRequest*)request;
++ (NSString*)filePathForRequest:(NSURLRequest*)request;
 @end
 
 
-@implementation NSURLConnectionVCR {
-    NSURLConnection* origConnection;
-}
-@synthesize origConnection;
+#pragma mark - NSURLConnectionVCR Implementation
 
-static IMP allocImplementationOrig = NULL;
-static id VCRAllocImplementation(id theSelf, SEL cmd, ...) {
-    NSURLConnectionVCR* vcr = [NSURLConnectionVCR alloc];
-    // Call original +alloc method:
-    NSURLConnection* origConn = allocImplementationOrig(theSelf, cmd);
-    [vcr setOrigConnection:origConn];
-    return vcr;
+@implementation NSURLConnectionVCR {
+    NSURLConnection* connection;
+    VCRConnectionDelegate* delegate;
+}
+
+#pragma mark General stuff
+@synthesize connection;
+@synthesize delegate;
+
+- (void)dealloc {
+    connection = nil;
+    delegate = nil;
+}
+
++ (BOOL)setPath:(NSString*)path error:(NSError *__autoreleasing *)error {
+    if (path != nil) {
+        NSFileManager* fm = [NSFileManager defaultManager];
+        BOOL isDirectory;
+        BOOL fileExists = [fm fileExistsAtPath:path isDirectory:&isDirectory];
+        if (fileExists == NO) {
+            NSError* createDirError = nil;
+            BOOL didCreateDir = [fm createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:&createDirError];
+            if (didCreateDir == NO) {
+                if (error) {
+                    NSDictionary* userInfo = [NSDictionary dictionaryWithObjectsAndKeys:createDirError, NSUnderlyingErrorKey, nil];
+                    *error = [NSError errorWithDomain:NSURLConnectionVCRErrorDomain code:NSURLConnectionVCRErrorCouldNotCreateDirectory userInfo:userInfo];
+                }
+                return NO;
+            }
+        } else if (isDirectory == NO) {
+            if (error) {
+                *error = [NSError errorWithDomain:NSURLConnectionVCRErrorDomain code:NSURLConnectionVCRErrorPathIsNotADirectory userInfo:nil];
+            }
+            return NO;
+        }
+    }
+    casettesPath = path;
+    return YES;
+}
+
++ (NSString*)path {
+    return casettesPath;
+}
+
++ (BOOL)deleteCacheForRequest:(NSURLRequest*)request error:(NSError *__autoreleasing *)error {
+    return [VCRCache deleteCacheForRequest:request error:error];
+}
+
++ (BOOL)hasCacheForRequest:(NSURLRequest*)request {
+    return [VCRCache hasCacheForRequest:request];
 }
 
 + (BOOL)startVCRWithPath:(NSString*)path error:(NSError *__autoreleasing *)error {
@@ -49,15 +109,29 @@ static id VCRAllocImplementation(id theSelf, SEL cmd, ...) {
         }
         return NO;
     } else {
-        Class connectionClass = NSClassFromString(@"NSURLConnection");
-        Class connectionMetaClass = objc_getMetaClass("NSURLConnection");
-        Method origMethod = class_getClassMethod(connectionClass, @selector(alloc));
-        allocImplementationOrig = method_getImplementation(origMethod);
-        class_replaceMethod(connectionMetaClass, @selector(alloc), VCRAllocImplementation, "@@:");        
-        
-        casettesPath = path;
-        
-        return YES;
+        if ([self setPath:path error:error] == NO) {
+            // We're not wrapping the error, would be overkill.
+            return NO;
+        } else {
+            // Swizzle the class methods we want to intercept (instance methods of the metaClasses):
+            Class connectionMetaClass = objc_getMetaClass("NSURLConnection");
+            Class connectionClass = objc_getClass("NSURLConnection");
+            Method origMethod;
+            IMP poseImplementation;
+            SEL theSelector;
+            Class theClass;
+            origImps = (IMP*)malloc(swizzleCount * sizeof(IMP));
+            
+            for (uint8 i = 0; i < swizzleCount; ++i) {
+                theSelector = swizzles[i].sel;
+                theClass = swizzles[i].isClassMethod ? connectionMetaClass : connectionClass;
+                origMethod = class_getInstanceMethod(theClass, theSelector);
+                origImps[i] = method_getImplementation(origMethod);
+                poseImplementation = imp_implementationWithBlock(poseImplementationBlockForSelector(theSelector));
+                class_replaceMethod(theClass, theSelector, poseImplementation, method_getTypeEncoding(origMethod));
+            }
+            return YES;
+        }
     }
 }
 
@@ -68,59 +142,262 @@ static id VCRAllocImplementation(id theSelf, SEL cmd, ...) {
         }
         return NO;
     } else {
+        Method theMethod;
         Class connectionMetaClass = objc_getMetaClass("NSURLConnection");
-        class_replaceMethod(connectionMetaClass, @selector(alloc), allocImplementationOrig, "@@:");        
-        allocImplementationOrig = NULL;
-        
+        Class connectionClass = objc_getClass("NSURLConnection");
+        SEL theSelector;
+        Class theClass;
+        IMP previousImp;
+
+        for (uint8 i = 0; i < swizzleCount; ++i) {
+            theSelector = swizzles[i].sel;
+            theClass = swizzles[i].isClassMethod ? connectionMetaClass : connectionClass;
+            theMethod = class_getInstanceMethod(theClass, theSelector);
+            previousImp = class_replaceMethod(theClass, theSelector, origImps[i], method_getTypeEncoding(theMethod));
+            imp_removeBlock(previousImp);
+            origImps[i] = NULL;
+        }
+        free(origImps);
+        origImps = NULL;
         casettesPath = nil;
-        
         return YES;
     }
 }
 
 + (BOOL)isVCRStarted {
-    return (allocImplementationOrig != NULL);
+    return (origImps != NULL);
+}
+
+#pragma mark Class posing / Swizzle bizz
+
+struct swizzle {
+    SEL sel;
+    BOOL isClassMethod;
+};
+
+static const uint8 swizzleCount = 3;
+static struct swizzle swizzles[swizzleCount] = {
+    {@selector(alloc), YES},
+    {@selector(sendSynchronousRequest:returningResponse:error:), YES},
+    {@selector(sendAsynchronousRequest:queue:completionHandler:), YES}
+};
+
+static IMP *origImps = NULL;
+
+static id poseImplementationBlockForSelector(SEL sel) {
+    if (sel == @selector(alloc)) {
+        return (id)^(id _self) __attribute__((ns_returns_retained)) { /* the ns_returns_retained attribute is important here, because the +alloc method is expected to return +1 */
+            NSURLConnectionVCR *vcr = [NSURLConnectionVCR alloc];
+            // This call to the original +alloc IMP is wrapped in objc_retainedObject, because ARC gets confused otherwise...
+            id connection = objc_retainedObject((__bridge objc_objectptr_t)origImps[0](_self, sel));
+            vcr.connection = connection;
+            return vcr;
+        };
+    } else if (sel == @selector(sendSynchronousRequest:returningResponse:error:)) {
+        return (id)^(id _self, NSURLRequest* request, NSURLResponse *__autoreleasing *response, NSError *__autoreleasing *error) {
+            VCRCache *cache = [VCRCache loadCacheForRequest:request];
+            if (cache == nil) {
+                __autoreleasing NSURLResponse *theResponse = nil;
+                __autoreleasing NSError *theError = nil;
+                BOOL success;
+                NSData *theResponseBody = (NSData*)origImps[1](_self, sel, request, &theResponse, &theError);
+                cache = [VCRCache storeResponse:theResponse withResponseBody:theResponseBody forRequest:request success:&success];
+                if (error && theError) {
+                    *error = theError;
+                } else if (error && success == NO) { /* If the previous condition was true, this next condition is not very interesting any more, hence `else if`: */
+                    *error = [NSError errorWithDomain:NSURLConnectionVCRErrorDomain code:NSURLConnectionVCRErrorStorageFailed userInfo:nil];
+                }
+            }
+            if (response) {
+                *response = cache.response;
+            }
+            return cache.responseBody;
+        };
+    } else if (sel == @selector(sendAsynchronousRequest:queue:completionHandler:)) {
+        return (id)^(id _self, NSURLRequest *request, NSOperationQueue *queue, void (^handler)(NSURLResponse*, NSData*, NSError*) ) {
+            __block VCRCache *cache = [VCRCache loadCacheForRequest:request];
+            if (cache == nil) {
+                origImps[2](_self, sel, request, queue, ^(NSURLResponse *response, NSData *data, NSError *error){
+                    cache = [VCRCache storeResponse:response withResponseBody:data forRequest:request success:NULL];
+                    handler(cache.response, cache.responseBody, error);
+                });
+            } else {
+                handler(cache.response, cache.responseBody, nil);
+            }
+        };
+    } else {
+        return nil;
+    }
 }
 
 - (BOOL)respondsToSelector:(SEL)aSelector {
-    return [origConnection respondsToSelector:aSelector];
+    return [connection respondsToSelector:aSelector];
 }
 
-- (void)doesNotRecognizeSelector:(SEL)aSelector {
-    
++ (BOOL)instancesRespondToSelector:(SEL)aSelector {
+    return [NSURLConnection instancesRespondToSelector:aSelector];
 }
 
 - (id)forwardingTargetForSelector:(SEL)aSelector {
-    return origConnection;
+    return connection;
 }
 
-- (void)forwardInvocation:(NSInvocation *)anInvocation {
-    
+- (id)initWithRequest:(NSURLRequest *)request delegate:(id)realDelegate startImmediately:(BOOL)startImmediately {
+    VCRCache* cache = [VCRCache loadCacheForRequest:request];
+    if (cache) {
+        NSOperationQueue* queue = [NSOperationQueue currentQueue];
+        [queue addOperationWithBlock:^{
+            // yes, we want self and realDelegate to be retained by this block...
+            // it's perhaps a bit unnatural to call these delegate methods right after each other, but let's see if it is sufficient.
+            [realDelegate connection:(NSURLConnection*)self didReceiveResponse:cache.response];
+            NSUInteger loc = 0;
+            NSUInteger len = 256u * 1024u;
+            NSUInteger totalLen = [cache.responseBody length];
+            do {
+                if (len + loc > totalLen) {
+                    len = totalLen - loc;
+                }
+                NSData* subData = [cache.responseBody subdataWithRange:NSMakeRange(loc, len)];
+                [realDelegate connection:(NSURLConnection*)self didReceiveData:subData];
+                loc += len;
+            } while (loc < totalLen);
+            [realDelegate connectionDidFinishLoading:(NSURLConnection*)self];
+        }];
+        return [self init];
+    } else {
+        // NSURLConnection retains its delegate until done loading --> VCRConnectionDelegate retains realDelegate, vcr, request until done loading
+        delegate = [[VCRConnectionDelegate alloc] init];
+        delegate.realDelegate = realDelegate;
+        delegate.request = request;
+        delegate.vcr = self;
+        if ([connection initWithRequest:request delegate:delegate startImmediately:startImmediately]) {};  // wrapped in if() to silence `Expression result unused` compiler warning
+        return [self init];
+    }
+}
+
+- (id)initWithRequest:(NSURLRequest *)request delegate:(id)realDelegate {
+    return [self initWithRequest:request delegate:delegate startImmediately:YES];
+}
+
+- (id)delegate {
+    return [delegate realDelegate];
 }
 
 @end
 
 
-@interface VCRCache (Private)
-+ (NSString*)hashForRequest:(NSURLRequest*)request;
-+ (NSString*)filePathForRequest:(NSURLRequest*)request;
+@implementation VCRConnectionDelegate {
+    __strong NSObject<NSURLConnectionDelegate, NSURLConnectionDataDelegate, NSURLConnectionDownloadDelegate, NSObject>* realDelegate;
+    NSURLConnectionVCR* vcr;
+    NSURLRequest* request;
+    NSURLResponse* response;
+    NSMutableData* responseData;
+}
+@synthesize realDelegate;
+@synthesize vcr;
+@synthesize response;
+@synthesize responseData;
+@synthesize request;
+
+- (BOOL)respondsToSelector:(SEL)aSelector {
+    return [realDelegate respondsToSelector:aSelector];
+}
+
++ (BOOL)instancesRespondToSelector:(SEL)aSelector {
+//    return [theClass instancesRespondToSelector:aSelector];
+    return YES;
+}
+
+- (id)forwardingTargetForSelector:(SEL)aSelector {
+    return realDelegate;
+}
+
+- (void)releaseChildren {
+    realDelegate = nil;
+    vcr.connection = nil;
+    vcr = nil;
+    request = nil;
+}
+
+- (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)theError {
+    [realDelegate connection:connection didFailWithError:theError];
+    [self releaseChildren];
+}
+
+- (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)theResponse {
+    response = theResponse;
+    [realDelegate connection:connection didReceiveResponse:theResponse];
+}
+
+- (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data {
+    if (responseData == nil) {
+        long long expectedContentLength = [response expectedContentLength];
+        responseData = [NSMutableData dataWithCapacity:expectedContentLength];
+    }
+    [responseData appendData:data];
+    [realDelegate connection:connection didReceiveData:data];
+}
+
+- (void)connectionDidFinishLoading:(NSURLConnection *)connection {
+    [VCRCache storeResponse:response withResponseBody:responseData forRequest:request success:NULL];
+    [realDelegate connectionDidFinishLoading:connection];
+    [self releaseChildren];
+}
+
+- (void)connectionDidFinishDownloading:(NSURLConnection *)connection destinationURL:(NSURL *) destinationURL {
+    [VCRCache storeResponse:response withResponseBody:[NSData dataWithContentsOfURL:destinationURL] forRequest:request success:NULL];
+    [realDelegate connectionDidFinishDownloading:connection destinationURL:destinationURL];
+    [self releaseChildren];
+}
+
 @end
 
+
+#pragma mark - VCRCache (Tape) Implementation
 
 @implementation VCRCache
 @synthesize response;
 @synthesize responseBody;
 
 + (VCRCache*)loadCacheForRequest:(NSURLRequest*)request {
+    if (request == nil) {
+        return nil;
+    }
     VCRCache* cache = [NSKeyedUnarchiver unarchiveObjectWithFile:[self filePathForRequest:request]];
     return cache;
 }
 
-+ (BOOL)storeResponse:(NSURLResponse*)response withResponseBody:(NSData*)data forRequest:(NSURLRequest*)request {
-    VCRCache* cache = [[VCRCache alloc] init];
-    cache.response = response;
-    cache.responseBody = data;
-    return [NSKeyedArchiver archiveRootObject:cache toFile:[self filePathForRequest:request]];
++ (VCRCache*)storeResponse:(NSURLResponse*)response withResponseBody:(NSData*)data forRequest:(NSURLRequest*)request success:(out BOOL*)outSuccess {
+    BOOL success;
+    VCRCache* cache = nil;
+    if (request == nil) {
+        success = NO;
+    } else {
+        cache = [[VCRCache alloc] init];
+        cache.response = response;
+        cache.responseBody = data;
+        NSString* filePath = [self filePathForRequest:request];
+        success = [NSKeyedArchiver archiveRootObject:cache toFile:filePath];
+//        if (success) {
+//            // Trigger Spotlight to create metadata, so one can see what request URL the cache file belongs to
+//            MDItemCreate(NULL, (__bridge CFStringRef)filePath);
+//        }
+    }
+    if (outSuccess) {
+        *outSuccess = success;
+    }
+    return cache;
+}
+
++ (BOOL)deleteCacheForRequest:(NSURLRequest*)request error:(NSError *__autoreleasing *)error {
+    NSString* filePath = [self filePathForRequest:request];
+    NSFileManager* fm = [NSFileManager defaultManager];
+    // We're not wrapping the error, would be overkill.
+    return [fm removeItemAtPath:filePath error:error];
+}
+
++ (BOOL)hasCacheForRequest:(NSURLRequest*)request {
+    return [[NSFileManager defaultManager] fileExistsAtPath:[VCRCache filePathForRequest:request]];
 }
 
 - (id)initWithCoder:(NSCoder *)coder {
@@ -150,7 +427,8 @@ static id VCRAllocImplementation(id theSelf, SEL cmd, ...) {
 }
 
 + (NSString*)filePathForRequest:(NSURLRequest*)request {
-    NSString* filePath = [casettesPath stringByAppendingPathComponent:[self hashForRequest:request]];
+    NSString* fileName = [[self hashForRequest:request] stringByAppendingPathExtension:@"vcr"];
+    NSString* filePath = [[NSURLConnectionVCR path] stringByAppendingPathComponent:fileName];
     return filePath;
 }
 
