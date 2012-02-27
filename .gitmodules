@@ -1,0 +1,3 @@
+[submodule "NSURLConnectionVCRTests/CocoaHTTPServer"]
+	path = NSURLConnectionVCRTests/CocoaHTTPServer
+	url = https://github.com/robbiehanson/CocoaHTTPServer.git
