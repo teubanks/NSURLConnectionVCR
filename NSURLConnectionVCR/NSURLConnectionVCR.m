@@ -9,7 +9,6 @@
 #import <CommonCrypto/CommonDigest.h>
 #import <objc/runtime.h>
 #import <objc/objc.h>
-#import <CoreServices/CoreServices.h>
 
 NSString* NSURLConnectionVCRErrorDomain = @"NSURLConnectionVCRErrorDomain";
 struct objc_class;
@@ -119,11 +118,15 @@ __strong static NSString* casettesPath;
             SEL theSelector;
             origImps = (IMP*)malloc(swizzleCount * sizeof(IMP));
             
-            for (uint8 i = 0; i < swizzleCount; ++i) {
+            for (unsigned char i = 0; i < swizzleCount; ++i) {
                 theSelector = swizzleSelectors[i];
                 origMethod = class_getInstanceMethod(theClass, theSelector);
                 origImps[i] = method_getImplementation(origMethod);
+                
+                // Depending on your SDK, you might need a bridged cast here:
+                // poseImplementation = imp_implementationWithBlock((__bridge void*)poseImplementationBlockForSelector(theSelector));
                 poseImplementation = imp_implementationWithBlock(poseImplementationBlockForSelector(theSelector));
+                
                 class_replaceMethod(theClass, theSelector, poseImplementation, method_getTypeEncoding(origMethod));
             }
             return YES;
@@ -143,7 +146,7 @@ __strong static NSString* casettesPath;
         Class theClass = objc_getMetaClass("NSURLConnection");
         IMP previousImp;
 
-        for (uint8 i = 0; i < swizzleCount; ++i) {
+        for (unsigned char i = 0; i < swizzleCount; ++i) {
             theSelector = swizzleSelectors[i];
             theMethod = class_getInstanceMethod(theClass, theSelector);
             previousImp = class_replaceMethod(theClass, theSelector, origImps[i], method_getTypeEncoding(theMethod));
@@ -163,7 +166,7 @@ __strong static NSString* casettesPath;
 
 #pragma mark Class posing / Swizzle bizz
 
-static const uint8 swizzleCount = 3;
+static const unsigned char swizzleCount = 3;
 static SEL swizzleSelectors[swizzleCount] = {NULL, NULL, NULL};
 
 + (void)initialize {
@@ -275,9 +278,13 @@ static id poseImplementationBlockForSelector(SEL sel) {
 
 @end
 
+@protocol NSURLConnectionDataDelegate;
+@protocol NSURLConnectionDownloadDelegate;
 
 @implementation VCRConnectionDelegate {
-    __strong NSObject<NSURLConnectionDelegate, NSURLConnectionDataDelegate, NSURLConnectionDownloadDelegate, NSObject>* realDelegate;
+    // Depending on your SDK, you might need one of these 2 lines:
+    //__strong NSObject<NSURLConnectionDelegate, NSObject>* realDelegate;    
+    __strong NSObject<NSURLConnectionDelegate, NSURLConnectionDataDelegate, NSURLConnectionDownloadDelegate, NSObject>* realDelegate;    
     NSURLConnectionVCR* vcr;
     NSURLRequest* request;
     NSURLResponse* response;
