@@ -56,7 +56,13 @@ OSStatus VCRGetPreviewData(NSURL* url,
             *mimeType = _mimeType;
         }
         if (utType) {
-            *utType = (__bridge NSString*)UTTypeCreatePreferredIdentifierForTag(kUTTagClassMIMEType, (__bridge CFStringRef)_mimeType, NULL);
+            CFStringRef supportedTypes[] = {kUTTypeHTML, kUTTypeXML, kUTTypeRTF, kUTTypePlainText, kUTTypeImage, kUTTypePDF, kUTTypeMovie, kUTTypeAudio, NULL};
+            for (NSInteger idx = 0; idx < 9; ++idx) {
+                *utType = (__bridge NSString*)UTTypeCreatePreferredIdentifierForTag(kUTTagClassMIMEType, (__bridge CFStringRef)_mimeType, supportedTypes[idx]);
+                if (*utType != nil) {
+                    break;
+                }
+            }
         }
         
         return noErr;
