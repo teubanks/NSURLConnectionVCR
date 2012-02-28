@@ -52,7 +52,7 @@
       </MacroExpansion>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "-p &quot;$(SRCROOT)/NSURLConnectionVCRTests/VCRTapes/3BE7EE88992C73C5A003BE0E36AC1F14.vcr&quot;"
+            argument = "-p &quot;$(SRCROOT)/NSURLConnectionVCRTests/VCRTapes/46B953C220F941DAAB3FABC969D7C52A.vcr&quot;"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
