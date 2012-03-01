@@ -124,8 +124,11 @@ __strong static NSString* casettesPath;
                 origImps[i] = method_getImplementation(origMethod);
                 
                 // Depending on your SDK, you might need a bridged cast here:
-                // poseImplementation = imp_implementationWithBlock((__bridge void*)poseImplementationBlockForSelector(theSelector));
+#if TARGET_IPHONE_SIMULATOR || TARGET_OS_IPHONE
+                poseImplementation = imp_implementationWithBlock((__bridge void*)poseImplementationBlockForSelector(theSelector));
+#else
                 poseImplementation = imp_implementationWithBlock(poseImplementationBlockForSelector(theSelector));
+#endif
                 
                 class_replaceMethod(theClass, theSelector, poseImplementation, method_getTypeEncoding(origMethod));
             }
