@@ -13,6 +13,10 @@
 NSString* NSURLConnectionVCRErrorDomain = @"NSURLConnectionVCRErrorDomain";
 struct objc_class;
 __strong static NSString* casettesPath;
+static IMP *origImps;
+static const unsigned char swizzleCount;
+static SEL swizzleSelectors[];
+static id poseImplementationBlockForSelector(SEL sel);
 
 #pragma mark - Private Interfaces
 
