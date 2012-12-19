@@ -128,12 +128,12 @@ static id poseImplementationBlockForSelector(SEL sel);
                 origImps[i] = method_getImplementation(origMethod);
                 
                 // Depending on your SDK, you might need a bridged cast here:
-#if TARGET_IPHONE_SIMULATOR || TARGET_OS_IPHONE
-                poseImplementation = imp_implementationWithBlock((__bridge void*)poseImplementationBlockForSelector(theSelector));
-#else
+//#if TARGET_IPHONE_SIMULATOR || TARGET_OS_IPHONE
+//                poseImplementation = imp_implementationWithBlock((__bridge void*)poseImplementationBlockForSelector(theSelector));
+//#else
                 poseImplementation = imp_implementationWithBlock(poseImplementationBlockForSelector(theSelector));
-#endif
-                
+//#endif
+
                 class_replaceMethod(theClass, theSelector, poseImplementation, method_getTypeEncoding(origMethod));
             }
             return YES;

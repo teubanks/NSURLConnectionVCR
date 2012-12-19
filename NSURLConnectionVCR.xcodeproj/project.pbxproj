@@ -51,6 +51,9 @@
 		10ACCB9A14FBDA06007F9BB5 /* GeneratePreviewForURL.m in Sources */ = {isa = PBXBuildFile; fileRef = 10ACCB9914FBDA06007F9BB5 /* GeneratePreviewForURL.m */; };
 		10ACCB9C14FBDA06007F9BB5 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 10ACCB9B14FBDA06007F9BB5 /* main.c */; };
 		10ACCBA214FBDB11007F9BB5 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 10ACCBA114FBDB11007F9BB5 /* Foundation.framework */; };
+		40CA5B391682402B00C8BF95 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 10ACCBA114FBDB11007F9BB5 /* Foundation.framework */; };
+		40CA5B461682433500C8BF95 /* NSURLConnectionVCR.m in Sources */ = {isa = PBXBuildFile; fileRef = 10852AEB14F906A70004895D /* NSURLConnectionVCR.m */; };
+		40CA5B4C168245ED00C8BF95 /* NSURLConnectionVCR.h in Headers */ = {isa = PBXBuildFile; fileRef = 10852AEA14F906A70004895D /* NSURLConnectionVCR.h */; settings = {ATTRIBUTES = (Public, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -140,6 +143,9 @@
 		10ACCB9B14FBDA06007F9BB5 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 		10ACCB9D14FBDA06007F9BB5 /* NSURLConnectionVCRQuicklook-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSURLConnectionVCRQuicklook-Prefix.pch"; sourceTree = "<group>"; };
 		10ACCBA114FBDB11007F9BB5 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		40CA5B381682402B00C8BF95 /* libNSURLConnectionVCR-iOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libNSURLConnectionVCR-iOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		40CA5B3C1682402B00C8BF95 /* NSURLConnectionVCR-iOS-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSURLConnectionVCR-iOS-Prefix.pch"; sourceTree = "<group>"; };
+		40CA5B491682438100C8BF95 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -174,6 +180,14 @@
 				10ACCB8D14FBDA06007F9BB5 /* ApplicationServices.framework in Frameworks */,
 				10ACCB8E14FBDA06007F9BB5 /* CoreServices.framework in Frameworks */,
 				10ACCB9014FBDA06007F9BB5 /* CoreFoundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		40CA5B351682402B00C8BF95 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				40CA5B391682402B00C8BF95 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -283,6 +297,7 @@
 				10852AC114F906870004895D /* NSURLConnectionVCR */,
 				10852AD714F906870004895D /* NSURLConnectionVCRTests */,
 				10ACCB9114FBDA06007F9BB5 /* NSURLConnectionVCRQuicklook */,
+				40CA5B3A1682402B00C8BF95 /* NSURLConnectionVCR-iOS */,
 				10852ABA14F906870004895D /* Frameworks */,
 				10852AB914F906870004895D /* Products */,
 			);
@@ -294,6 +309,7 @@
 				10852AB814F906870004895D /* NSURLConnectionVCR.framework */,
 				10852AD014F906870004895D /* NSURLConnectionVCRTests.octest */,
 				10ACCB8914FBDA06007F9BB5 /* NSURLConnectionVCRQuicklook.qlgenerator */,
+				40CA5B381682402B00C8BF95 /* libNSURLConnectionVCR-iOS.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -390,6 +406,23 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
+		40CA5B3A1682402B00C8BF95 /* NSURLConnectionVCR-iOS */ = {
+			isa = PBXGroup;
+			children = (
+				40CA5B491682438100C8BF95 /* Foundation.framework */,
+				40CA5B3B1682402B00C8BF95 /* Supporting Files */,
+			);
+			path = "NSURLConnectionVCR-iOS";
+			sourceTree = "<group>";
+		};
+		40CA5B3B1682402B00C8BF95 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				40CA5B3C1682402B00C8BF95 /* NSURLConnectionVCR-iOS-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -406,6 +439,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				1007806314FBE8B5009362E5 /* VCRGetPreview.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		40CA5B4B168245E600C8BF95 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				40CA5B4C168245ED00C8BF95 /* NSURLConnectionVCR.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -468,6 +509,23 @@
 			productReference = 10ACCB8914FBDA06007F9BB5 /* NSURLConnectionVCRQuicklook.qlgenerator */;
 			productType = "com.apple.product-type.bundle";
 		};
+		40CA5B371682402B00C8BF95 /* NSURLConnectionVCR-iOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 40CA5B431682402B00C8BF95 /* Build configuration list for PBXNativeTarget "NSURLConnectionVCR-iOS" */;
+			buildPhases = (
+				40CA5B341682402B00C8BF95 /* Sources */,
+				40CA5B351682402B00C8BF95 /* Frameworks */,
+				40CA5B4B168245E600C8BF95 /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "NSURLConnectionVCR-iOS";
+			productName = "NSURLConnectionVCR-iOS";
+			productReference = 40CA5B381682402B00C8BF95 /* libNSURLConnectionVCR-iOS.a */;
+			productType = "com.apple.product-type.library.static";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -493,6 +551,7 @@
 				10852AB714F906870004895D /* NSURLConnectionVCR */,
 				10ACCB8814FBDA06007F9BB5 /* NSURLConnectionVCRQuicklook */,
 				10852ACF14F906870004895D /* NSURLConnectionVCRTests */,
+				40CA5B371682402B00C8BF95 /* NSURLConnectionVCR-iOS */,
 			);
 		};
 /* End PBXProject section */
@@ -598,6 +657,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		40CA5B341682402B00C8BF95 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				40CA5B461682433500C8BF95 /* NSURLConnectionVCR.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -640,7 +707,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
 				CLANG_ENABLE_OBJC_ARC = YES;
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -657,9 +724,12 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
 				MACOSX_DEPLOYMENT_TARGET = "";
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = "";
+				SUPPORTED_PLATFORMS = macosx;
+				VALID_ARCHS = "i386 x86_64 armv7s armv7";
 			};
 			name = Debug;
 		};
@@ -667,7 +737,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
 				CLANG_ENABLE_OBJC_ARC = YES;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -678,8 +748,11 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
 				MACOSX_DEPLOYMENT_TARGET = "";
 				SDKROOT = "";
+				SUPPORTED_PLATFORMS = macosx;
+				VALID_ARCHS = "i386 x86_64 armv7s armv7";
 			};
 			name = Release;
 		};
@@ -785,6 +858,47 @@
 			};
 			name = Release;
 		};
+		40CA5B411682402B00C8BF95 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				DSTROOT = /tmp/NSURLConnectionVCR_iOS.dst;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "NSURLConnectionVCR-iOS/NSURLConnectionVCR-iOS-Prefix.pch";
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
+			};
+			name = Debug;
+		};
+		40CA5B421682402B00C8BF95 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				DSTROOT = /tmp/NSURLConnectionVCR_iOS.dst;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "NSURLConnectionVCR-iOS/NSURLConnectionVCR-iOS-Prefix.pch";
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -823,6 +937,14 @@
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
+		};
+		40CA5B431682402B00C8BF95 /* Build configuration list for PBXNativeTarget "NSURLConnectionVCR-iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				40CA5B411682402B00C8BF95 /* Debug */,
+				40CA5B421682402B00C8BF95 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
 		};
 /* End XCConfigurationList section */
 	};
